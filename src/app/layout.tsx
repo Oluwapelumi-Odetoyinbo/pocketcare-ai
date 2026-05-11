@@ -43,6 +43,20 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col font-sans">
+        {/* Capture beforeinstallprompt BEFORE React hydrates */}
+        <Script
+          id="pwa-install-capture"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window._deferredPrompt = null;
+              window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                window._deferredPrompt = e;
+              });
+            `,
+          }}
+        />
         {children}
         <Script
           id="sw-register"

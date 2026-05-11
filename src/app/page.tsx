@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -9,18 +9,7 @@ const WORDS = ["Literacy", "Safety", "Clarity", "Guidance", "Knowledge"];
 export default function LandingPage() {
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(true);
-  const deferredPrompt = useRef<Event | null>(null);
-  const router = useRouter();
 
-  // Capture the beforeinstallprompt event
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      deferredPrompt.current = e;
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
 
   // Word rotation animation
   useEffect(() => {
@@ -34,28 +23,27 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, []);
 
+  const router = useRouter();
+
   const handleGetStarted = async () => {
-    if (deferredPrompt.current) {
-      const prompt = deferredPrompt.current as any;
+    // Read from the globally-captured prompt (set before React hydrates)
+    const prompt = (window as any)._deferredPrompt as any;
+    if (prompt) {
+      (window as any)._deferredPrompt = null;
       prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      deferredPrompt.current = null;
-      // Navigate regardless of install choice
-      router.push("/consultation");
-    } else {
-      // Already installed or prompt not available
-      router.push("/consultation");
+      await prompt.userChoice;
     }
+    router.push("/consultation");
   };
 
   return (
-    <div 
+    <div
       className="h-[100dvh] relative overflow-hidden bg-[#f8fbfa] selection:bg-[#9ce3d7]/30 flex flex-col"
       style={{ fontFamily: "'Raleway', sans-serif" }}
     >
       {/* Dynamic Background Pattern */}
       <div className="absolute inset-0 pointer-events-none opacity-60">
-        <div 
+        <div
           className="absolute inset-0"
           style={{
             backgroundImage: `
@@ -65,7 +53,7 @@ export default function LandingPage() {
             backgroundSize: '70px 100%, 140px 100%'
           }}
         />
-        <div 
+        <div
           className="absolute top-0 left-0 right-0 h-[42%] bg-gradient-to-r from-transparent via-[rgba(4,50,48,0.035)] to-transparent opacity-80"
           style={{
             clipPath: 'polygon(0 0, 100% 0, 100% 58%, 94% 58%, 94% 73%, 88% 73%, 88% 43%, 82% 43%, 82% 65%, 74% 65%, 74% 48%, 68% 48%, 68% 80%, 60% 80%, 60% 46%, 54% 46%, 54% 68%, 47% 68%, 47% 38%, 40% 38%, 40% 76%, 31% 76%, 31% 50%, 25% 50%, 25% 65%, 18% 65%, 18% 36%, 12% 36%, 12% 70%, 5% 70%, 5% 48%, 0 48%)'
@@ -92,10 +80,10 @@ export default function LandingPage() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href="/consultation" className="hidden sm:inline-flex h-9 px-3.5 items-center justify-center border-[1.5px] border-[#111] text-[14px] font-medium tracking-[-0.03em] hover:bg-[#111]/5 transition-colors text-[#071514]">
-            Pricing
-          </Link>
-          <button 
+          {/* <Link href="/consultation" className="hidden sm:inline-flex h-9 px-3.5 items-center justify-center border-[1.5px] border-[#111] text-[14px] font-medium tracking-[-0.03em] hover:bg-[#111]/5 transition-colors text-[#071514]">
+              Pricing
+            </Link> */}
+          <button
             onClick={handleGetStarted}
             className="h-8 sm:h-9 pl-3 sm:pl-3.5 pr-0 bg-[#99e7dc] inline-flex items-center justify-center border-[1.5px] border-[#111] text-[13px] sm:text-[14px] tracking-[-0.03em] hover:brightness-95 transition-all text-[#071514] font-bold cursor-pointer"
           >
@@ -107,16 +95,16 @@ export default function LandingPage() {
 
       {/* Main */}
       <main className="relative z-10 px-4 sm:px-10 max-w-[1180px] w-full mx-auto text-center flex-1 flex flex-col items-center overflow-hidden min-h-0">
-        
+
         {/* Text + Buttons */}
         <div className="w-full flex flex-col items-center shrink-0 pt-20 sm:pt-10 md:pt-14">
-          <h1 
+          <h1
             className="text-[clamp(34px,8vw,64px)] leading-[1.0] max-w-[900px] mx-auto tracking-[-0.04em] font-bold text-[#071514]"
             style={{ fontFamily: "'Raleway', sans-serif" }}
           >
             <div className="mb-2">
               AI Medicine{" "}
-              <span 
+              <span
                 className={`inline-block min-w-[140px] transition-all duration-500 text-[#0F766E] ${fade ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
               >
                 {WORDS[index]}
@@ -124,14 +112,14 @@ export default function LandingPage() {
             </div>
             <div>Assistant</div>
           </h1>
-          <p 
+          <p
             className="mt-3 text-[14px] sm:text-[16px] md:text-[17px] tracking-[-0.02em] text-[#071514]/60 max-w-sm sm:max-w-md"
             style={{ fontFamily: "'Raleway', sans-serif" }}
           >
             Understand medicine information in simple language. Safe, accurate, and accessible for everyone.
           </p>
           <div className="mt-5 sm:mt-6 flex flex-row justify-center gap-2">
-            <button 
+            <button
               onClick={handleGetStarted}
               className="h-[38px] sm:h-[42px] px-4 sm:px-5 border-[1.5px] border-[#111] inline-flex items-center justify-center text-[13px] sm:text-[14px] font-semibold tracking-[-0.03em] hover:bg-[#111]/5 transition-colors text-[#071514] cursor-pointer"
             >
@@ -155,10 +143,10 @@ export default function LandingPage() {
               src="https://res.cloudinary.com/dokbfxcxv/image/upload/v1778512419/a19c89b7-d7c2-4a05-a194-c76a99547e8f-removebg-preview_d0x1cr.png"
               alt="AI Illustration"
               className="
-                w-[135vw]
+                w-[139vw]
                 max-w-none
-                h-auto
-                object-contain
+                h-[23rem]
+                object-contain  
                 translate-y-6
                 sm:w-full
                 sm:max-w-[650px]
