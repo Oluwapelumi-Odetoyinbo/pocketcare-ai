@@ -125,10 +125,13 @@ export default function LandingPage() {
             >
               Get Started - It&apos;s Free
             </button>
-            <Link href="/consultation" className="h-[38px] sm:h-[42px] pl-4 sm:pl-5 pr-0 bg-[#99e7dc] inline-flex items-center justify-center border-[1.5px] border-[#111] text-[13px] sm:text-[14px] font-bold tracking-[-0.03em] hover:brightness-95 transition-all text-[#071514]">
+            <button 
+              onClick={handleGetStarted}
+              className="h-[38px] sm:h-[42px] pl-4 sm:pl-5 pr-0 bg-[#99e7dc] inline-flex items-center justify-center border-[1.5px] border-[#111] text-[13px] sm:text-[14px] font-bold tracking-[-0.03em] hover:brightness-95 transition-all text-[#071514] cursor-pointer"
+            >
               Launch App
               <span className="w-[38px] sm:w-[44px] h-full ml-3 border-l-[1.5px] border-[#111] inline-flex items-center justify-center text-[22px] sm:text-[26px] leading-none">→</span>
-            </Link>
+            </button>
           </div>
         </div>
 
