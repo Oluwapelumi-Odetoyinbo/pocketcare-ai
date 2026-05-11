@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --color-canvas: #F7FBFA;
+  --color-surface-card: #FFFFFF;
+  --color-primary: #0F766E;
+  --color-primary-soft: #CCFBF1;
+  --color-secondary: #38BDF8;
+  --color-ink: #0F172A;
+  --color-muted: #64748B;
+  --color-border: #DDEDEA;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+  --color-success: #16A34A;
+}
+
+@theme inline {
+  --color-background: var(--color-canvas);
+  --color-foreground: var(--color-ink);
+  
+  --color-canvas: var(--color-canvas);
+  --color-surface-card: var(--color-surface-card);
+  --color-primary: var(--color-primary);
+  --color-primary-soft: var(--color-primary-soft);
+  --color-secondary: var(--color-secondary);
+  --color-ink: var(--color-ink);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-success: var(--color-success);
+
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-serif: var(--font-newsreader);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  letter-spacing: -0.01em; /* Tighter spacing for modern look */
+}
+
+/* Remove default serif override so we can explicitly use it only when strictly needed, 
+   modern apps generally use sans-serif for headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.35);
+}
+
+/* Selection */
+::selection {
+  background: rgba(15, 118, 110, 0.15);
+}

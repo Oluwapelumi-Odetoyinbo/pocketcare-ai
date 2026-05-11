@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💊 Pocketcare AI
 
-## Getting Started
+**Pocketcare AI** is a premium, AI-driven medical guidance platform designed to bridge the gap between complex pharmaceutical information and patient understanding. Built for the **Gemma 4 Good Hackathon**, it leverages the power of Gemma 4 to provide clear, simplified, and safe medication literacy.
 
-First, run the development server:
+![Pocketcare AI Preview](https://res.cloudinary.com/dokbfxcxv/image/upload/v1778456767/11165c00-3068-45d1-9f23-ce0e5a97f9a2_ndvyt2.png)
 
+## ✨ Features
+
+- 📱 **Installable PWA**: A seamless experience that lives on your home screen or desktop.
+- 🤖 **Powered by Gemma 4**: Utilizing the `gemma-4-26b-a4b-it` model via Google Gemini API for high-quality medical reasoning.
+- 🎨 **Premium MedTech UI**: A clean, calming aesthetic using a curated palette (Teal, Soft Mint, Slate) and modern typography (Raleway & Geist).
+- ⚡ **Animated Interaction**: Staggered entrance animations and dynamic hero text for a "living" interface.
+- 🛡️ **Safety-First Architecture**: 
+  - **Confidence Badges**: Real-time confidence scoring for every AI response.
+  - **Urgent Warnings**: Immediate emergency detection and escalation.
+  - **Clear Disclaimers**: Integrated medical disclaimers on every result.
+- 🔍 **Medicine Insights**: Detailed breakdowns of uses, side effects, warnings, and interactions.
+
+## 🚀 Tech Stack
+
+- **Framework**: [Next.js 14+](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescript.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **AI Model**: [Gemma 4](https://ai.google.dev/gemma) (via Google Gemini API)
+- **Icons/Graphics**: Custom SVG Leaf Logo & Cloudinary-hosted assets
+- **Deployment**: Optimized for Vercel
+
+## 🛠️ Local Setup
+
+Pocketcare AI requires a Google Gemini API key to function.
+
+1. **Clone the repository**:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-username/pocketcare-ai.git
+cd pocketcare-ai
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies**:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Configure Environment Variables**:
+Create a `.env.local` file in the root directory and add your Gemini API key:
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+*Get your key at [Google AI Studio](https://aistudio.google.com/)*.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Run the development server**:
+```bash
+npm run dev
+```
+   Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-## Learn More
+## ⚠️ Medical Disclaimer
 
-To learn more about Next.js, take a look at the following resources:
+**Pocketcare AI is for educational medicine literacy ONLY.**
+- It is **NOT** a doctor.
+- It does **NOT** diagnose or prescribe.
+- It is **NOT** a substitute for professional medical advice, diagnosis, or treatment.
+- **ALWAYS** consult a qualified healthcare provider for any medical decisions.
+- **In an emergency, contact your local emergency services (e.g., 911) immediately.**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is built as part of the Gemma 4 Good Hackathon. See `LICENSE` for more details (if applicable).
