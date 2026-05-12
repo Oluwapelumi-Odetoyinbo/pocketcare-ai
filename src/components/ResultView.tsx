@@ -95,8 +95,70 @@ function ConfidenceBadge({ level }: { level: string }) {
   );
 }
 
+/* ─── Reminder Modal ─── */
+function ReminderModal({ reminder, onDismiss }: { reminder: { reason: string; suggestedLabel: string }; onDismiss: () => void }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 50);
+    return () => clearTimeout(t);
+  }, []);
+
+  const handleSetReminder = async () => {
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+      await Notification.requestPermission();
+    }
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      new Notification("Pocketcare AI Reminder", {
+        body: reminder.reason,
+        tag: "med-reminder",
+      });
+    }
+    onDismiss();
+  };
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6 transition-all duration-300 ease-out ${
+        visible ? "bg-black/30 backdrop-blur-sm" : "bg-transparent pointer-events-none"
+      }`}
+      onClick={onDismiss}
+    >
+      <div
+        className={`bg-surface-card w-full md:max-w-sm rounded-t-2xl md:rounded-2xl shadow-2xl border border-border transition-all duration-500 ease-out ${
+          visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6">
+          <div className="w-12 h-12 rounded-full bg-primary-soft flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-ink text-center mb-1">Reminder Suggestion</h3>
+          <p className="text-sm text-muted text-center leading-relaxed">{reminder.reason}</p>
+          <div className="mt-4 bg-primary-soft/50 rounded-xl px-4 py-3 text-center">
+            <span className="text-sm font-bold text-primary">{reminder.suggestedLabel}</span>
+          </div>
+        </div>
+        <div className="flex border-t border-border">
+          <button onClick={onDismiss} className="flex-1 py-3.5 text-sm font-semibold text-muted hover:text-ink transition-colors active:bg-surface-card">
+            Dismiss
+          </button>
+          <div className="w-px bg-border" />
+          <button onClick={handleSetReminder} className="flex-1 py-3.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors active:bg-surface-card">
+            Set Reminder
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ResultView({ response, onClose }: ResultViewProps) {
   const [headerVisible, setHeaderVisible] = useState(false);
+  const [showReminder, setShowReminder] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -159,6 +221,13 @@ export default function ResultView({ response, onClose }: ResultViewProps) {
 
   // Filter out empty list sections
   const activeSections = sections.filter(s => s.type === "text" || (s.items && s.items.length > 0));
+  const lastSectionDelay = 250 + (activeSections.length - 1) * 120;
+
+  useEffect(() => {
+    if (!guidance.reminderSuggestion.canCreateReminder) return;
+    const timer = setTimeout(() => setShowReminder(true), lastSectionDelay + 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div ref={containerRef} className="pb-8 md:pb-12">
@@ -242,6 +311,13 @@ export default function ResultView({ response, onClose }: ResultViewProps) {
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
         New Search
       </button>
+
+      {guidance.reminderSuggestion.canCreateReminder && showReminder && (
+        <ReminderModal
+          reminder={{ reason: guidance.reminderSuggestion.reason, suggestedLabel: guidance.reminderSuggestion.suggestedLabel }}
+          onDismiss={() => setShowReminder(false)}
+        />
+      )}
     </div>
   );
 }

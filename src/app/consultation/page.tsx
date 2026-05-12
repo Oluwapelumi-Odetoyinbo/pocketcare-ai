@@ -19,6 +19,19 @@ export default function Home() {
   const [assistantResponse, setAssistantResponse] = useState<AssistantResponse | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+  const [msgVisible, setMsgVisible] = useState(true);
+
+  type Tab = "home" | "history" | "saved" | "settings";
+  const [activeTab, setActiveTab] = useState<Tab>("home");
+
+  const loadingMessages = [
+    "Checking medicine knowledge...",
+    "Consulting Gemma 4 AI...",
+    "Analyzing safety information...",
+    "Preparing your guidance...",
+    "Finalizing results...",
+  ];
 
   // On desktop, skip splash/onboarding and go straight to home
   useEffect(() => {
@@ -33,6 +46,22 @@ export default function Home() {
     mql.addEventListener("change", update);
     return () => mql.removeEventListener("change", update);
   }, [appState]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingMsgIdx(0);
+      setMsgVisible(true);
+      return;
+    }
+    const id = setInterval(() => {
+      setMsgVisible(false);
+      setTimeout(() => {
+        setLoadingMsgIdx(prev => (prev + 1) % loadingMessages.length);
+        setMsgVisible(true);
+      }, 400);
+    }, 2800);
+    return () => clearInterval(id);
+  }, [isLoading]);
 
   const handleSearch = async (name: string) => {
     if (!name.trim()) return;
@@ -69,6 +98,7 @@ export default function Home() {
     setAssistantResponse(null);
     setMedicineName("");
     setAppState("home");
+    setActiveTab("home");
   };
 
   const commonActions = [
@@ -93,10 +123,10 @@ export default function Home() {
               <h1 className="font-bold text-ink tracking-tight text-lg">Pocketcare AI</h1>
             </div>
             <div className="flex gap-8">
-              <button onClick={handleBackToSearch} className={`text-sm font-medium transition-colors relative ${appState === "home" ? "text-primary after:absolute after:bottom-[-18px] after:left-0 after:w-full after:h-[2px] after:bg-primary after:rounded" : "text-muted hover:text-ink"}`}>Home</button>
-              <button className="text-sm font-medium text-muted hover:text-ink transition-colors">History</button>
-              <button className="text-sm font-medium text-muted hover:text-ink transition-colors">Saved</button>
-              <button className="text-sm font-medium text-muted hover:text-ink transition-colors">Settings</button>
+              <button onClick={() => { setActiveTab("home"); setAppState("home"); }} className={`text-sm font-medium transition-colors relative ${activeTab === "home" ? "text-primary after:absolute after:bottom-[-18px] after:left-0 after:w-full after:h-[2px] after:bg-primary after:rounded" : "text-muted hover:text-ink"}`}>Home</button>
+              <button onClick={() => { setActiveTab("history"); setAppState("home"); }} className={`text-sm font-medium transition-colors relative ${activeTab === "history" ? "text-primary after:absolute after:bottom-[-18px] after:left-0 after:w-full after:h-[2px] after:bg-primary after:rounded" : "text-muted hover:text-ink"}`}>History</button>
+              <button onClick={() => { setActiveTab("saved"); setAppState("home"); }} className={`text-sm font-medium transition-colors relative ${activeTab === "saved" ? "text-primary after:absolute after:bottom-[-18px] after:left-0 after:w-full after:h-[2px] after:bg-primary after:rounded" : "text-muted hover:text-ink"}`}>Saved</button>
+              <button onClick={() => { setActiveTab("settings"); setAppState("home"); }} className={`text-sm font-medium transition-colors relative ${activeTab === "settings" ? "text-primary after:absolute after:bottom-[-18px] after:left-0 after:w-full after:h-[2px] after:bg-primary after:rounded" : "text-muted hover:text-ink"}`}>Settings</button>
             </div>
           </div>
         )}
@@ -107,7 +137,9 @@ export default function Home() {
 
         {/* ─── Home Screen ─── */}
         {appState === "home" && (
-          <div className="flex-1 flex flex-col animate-in fade-in duration-300 h-full overflow-y-auto pb-24 md:pb-8 bg-canvas">
+          <>
+            {activeTab === "home" && (
+              <div className="flex-1 flex flex-col animate-in fade-in duration-300 h-full overflow-y-auto pb-24 md:pb-8 bg-canvas">
             
             {/* Mobile Header Bar */}
             <div className="flex items-center justify-between px-5 pt-4 pb-2 md:hidden">
@@ -185,7 +217,7 @@ export default function Home() {
                 <h3 className="text-xs font-bold text-muted uppercase tracking-widest mb-3">Common actions</h3>
                 <div className="grid grid-cols-3 md:grid-cols-3 gap-2.5 md:gap-3">
                   {commonActions.map((action) => (
-                    <button key={action.label} onClick={() => { const el = (document.getElementById('medicine-search') || document.getElementById('medicine-search-mobile')) as HTMLInputElement; el?.focus(); }} className="flex flex-col items-center justify-center p-3 md:p-5 bg-surface-card rounded-2xl border border-border shadow-sm active:scale-95 transition-all text-center gap-2 hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 md:flex-row md:justify-start md:items-center md:gap-4 md:text-left">
+                    <button key={action.label} onClick={() => { if (action.query) { setMedicineName(prev => prev.trim() ? `${prev.trim()} ${action.query}` : action.query); } const el = (document.getElementById('medicine-search') || document.getElementById('medicine-search-mobile')) as HTMLInputElement; el?.focus(); }} className="flex flex-col items-center justify-center p-3 md:p-5 bg-surface-card rounded-2xl border border-border shadow-sm active:scale-95 transition-all text-center gap-2 hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 md:flex-row md:justify-start md:items-center md:gap-4 md:text-left">
                       <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl ${action.color} flex items-center justify-center shrink-0`}>{action.icon}</div>
                       <div>
                         <span className="font-semibold text-ink text-[10px] md:text-sm leading-tight block">{action.label}</span>
@@ -222,7 +254,87 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
+              </div>
+            )}
+            {activeTab === "history" && (
+              <div className="flex-1 flex flex-col animate-in fade-in duration-300 h-full overflow-y-auto pb-24 md:pb-8 bg-canvas">
+                <div className="px-5 pt-6 md:px-8 lg:px-16 md:max-w-5xl md:mx-auto w-full">
+                  <h2 className="text-2xl font-extrabold text-ink tracking-tight md:text-3xl">History</h2>
+                  <p className="text-sm text-muted mt-1 mb-6">Your recent medicine searches</p>
+                  {recentSearches.length > 0 ? (
+                    <div className="space-y-2">
+                      {recentSearches.map((item, i) => (
+                        <button key={i} onClick={() => handleSearch(item)} className="w-full flex items-center justify-between px-4 py-3.5 bg-surface-card rounded-2xl border border-border shadow-sm hover:border-primary/30 hover:shadow-md transition-all text-left">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-primary-soft flex items-center justify-center">
+                              <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                            <span className="text-sm font-medium text-ink">{item}</span>
+                          </div>
+                          <svg className="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20">
+                      <div className="w-16 h-16 rounded-full bg-surface-card border border-border flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-7 h-7 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-ink mb-1">No searches yet</h3>
+                      <p className="text-sm text-muted max-w-xs mx-auto">Your medicine searches will appear here. Start by searching for a medicine above.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {activeTab === "saved" && (
+              <div className="flex-1 flex flex-col animate-in fade-in duration-300 h-full overflow-y-auto pb-24 md:pb-8 bg-canvas">
+                <div className="px-5 pt-6 md:px-8 lg:px-16 md:max-w-5xl md:mx-auto w-full">
+                  <h2 className="text-2xl font-extrabold text-ink tracking-tight md:text-3xl">Saved</h2>
+                  <p className="text-sm text-muted mt-1 mb-6">Your bookmarked medicine guides</p>
+                  <div className="text-center py-20">
+                    <div className="w-16 h-16 rounded-full bg-surface-card border border-border flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-7 h-7 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-ink mb-1">Nothing saved yet</h3>
+                    <p className="text-sm text-muted max-w-xs mx-auto">Tap the bookmark icon on any medicine guide to save it here for quick access.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {activeTab === "settings" && (
+              <div className="flex-1 flex flex-col animate-in fade-in duration-300 h-full overflow-y-auto pb-24 md:pb-8 bg-canvas">
+                <div className="px-5 pt-6 md:px-8 lg:px-16 md:max-w-5xl md:mx-auto w-full">
+                  <h2 className="text-2xl font-extrabold text-ink tracking-tight md:text-3xl">Settings</h2>
+                  <p className="text-sm text-muted mt-1 mb-6">App preferences and information</p>
+                  <div className="space-y-3">
+                    <div className="bg-surface-card rounded-2xl border border-border shadow-sm p-5">
+                      <h3 className="font-bold text-ink text-sm mb-1">About</h3>
+                      <p className="text-sm text-muted leading-relaxed">Pocketcare AI is an offline-first medicine literacy app powered by Gemma 4. It provides educational medicine guidance in simple language.</p>
+                    </div>
+                    <div className="bg-surface-card rounded-2xl border border-border shadow-sm p-5">
+                      <h3 className="font-bold text-ink text-sm mb-1">Medical Disclaimer</h3>
+                      <p className="text-sm text-muted leading-relaxed">This app is for educational purposes only. It does not diagnose, prescribe, or replace professional medical advice. Always consult a doctor or pharmacist.</p>
+                    </div>
+                    {recentSearches.length > 0 && (
+                      <button onClick={() => setRecentSearches([])} className="w-full flex items-center justify-between px-4 py-3.5 bg-surface-card rounded-2xl border border-border shadow-sm hover:border-danger/30 hover:shadow-md transition-all text-left">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                          </div>
+                          <span className="text-sm font-medium text-danger">Clear search history</span>
+                        </div>
+                      </button>
+                    )}
+                    <div className="bg-surface-card rounded-2xl border border-border shadow-sm p-5">
+                      <h3 className="font-bold text-ink text-sm mb-1">Version</h3>
+                      <p className="text-sm text-muted">1.0.0 — Gemma 4 Good Hackathon</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* ─── Result Screen ─── */}
@@ -254,7 +366,9 @@ export default function Home() {
               {isLoading ? (
                 <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
                   <div className="w-48 h-48 mb-4"><Lottie animationData={sparklesAnimation} loop={true} /></div>
-                  <h3 className="text-lg font-bold text-ink mb-1">Thinking with Gemma 4...</h3>
+                  <h3 className={`text-lg font-bold text-ink mb-1 transition-all duration-500 ease-in-out ${msgVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}>
+                    {loadingMessages[loadingMsgIdx]}
+                  </h3>
                   <p className="text-sm text-muted">Analyzing your request safely.</p>
                 </div>
               ) : assistantResponse ? (
@@ -267,20 +381,20 @@ export default function Home() {
         {/* ─── Bottom Navigation (Mobile only) ─── */}
         {(appState === "home" || appState === "result") && (
           <div className="absolute bottom-0 left-0 w-full bg-canvas border-t border-border px-6 py-2.5 flex justify-around items-center z-20 pb-[env(safe-area-inset-bottom,12px)] shadow-[0_-4px_24px_rgba(0,0,0,0.04)] md:hidden">
-            <button onClick={handleBackToSearch} className={`flex flex-col items-center gap-0.5 py-1 px-3 ${appState === "home" ? "text-primary" : "text-muted hover:text-ink"}`}>
-              <svg className="w-5 h-5" fill={appState === "home" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+            <button onClick={() => { setActiveTab("home"); setAppState("home"); }} className={`flex flex-col items-center gap-0.5 py-1 px-3 ${activeTab === "home" ? "text-primary" : "text-muted hover:text-ink"}`}>
+              <svg className="w-5 h-5" fill={activeTab === "home" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
               <span className="text-[10px] font-semibold">Home</span>
             </button>
-            <button className="flex flex-col items-center gap-0.5 py-1 px-3 text-muted hover:text-ink">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <button onClick={() => { setActiveTab("history"); setAppState("home"); }} className={`flex flex-col items-center gap-0.5 py-1 px-3 ${activeTab === "history" ? "text-primary" : "text-muted hover:text-ink"}`}>
+              <svg className="w-5 h-5" fill={activeTab === "history" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <span className="text-[10px] font-semibold">History</span>
             </button>
-            <button className="flex flex-col items-center gap-0.5 py-1 px-3 text-muted hover:text-ink">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
+            <button onClick={() => { setActiveTab("saved"); setAppState("home"); }} className={`flex flex-col items-center gap-0.5 py-1 px-3 ${activeTab === "saved" ? "text-primary" : "text-muted hover:text-ink"}`}>
+              <svg className="w-5 h-5" fill={activeTab === "saved" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
               <span className="text-[10px] font-semibold">Saved</span>
             </button>
-            <button className="flex flex-col items-center gap-0.5 py-1 px-3 text-muted hover:text-ink">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            <button onClick={() => { setActiveTab("settings"); setAppState("home"); }} className={`flex flex-col items-center gap-0.5 py-1 px-3 ${activeTab === "settings" ? "text-primary" : "text-muted hover:text-ink"}`}>
+              <svg className="w-5 h-5" fill={activeTab === "settings" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
               <span className="text-[10px] font-semibold">Settings</span>
             </button>
           </div>
