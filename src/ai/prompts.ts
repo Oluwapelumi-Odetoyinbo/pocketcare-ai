@@ -24,6 +24,13 @@ Medicine name: ${medicineName}
 User question: ${question}
 Preferred explanation style: ${language}
 
+=== ADAPTATION RULE ===
+Read the "User question" above. If it asks something specific (e.g. "What are the side effects of X", "How to take X", "Is X safe"), then:
+1. Extract the actual medicine from the question and answer that specific question directly in the "answer" field.
+2. Set "questionFocus" to a short label describing what was asked (e.g. "side effects", "dosage", "safety", "uses", "interactions", "general").
+3. Only populate the JSON fields that are relevant to the question. Leave unrelated fields as empty strings or empty arrays.
+4. If the question is just a medicine name with no specific angle (e.g. "Paracetamol", "Ibuprofen"), set "questionFocus" to "general" and fill out all sections fully.
+
 Required JSON shape:
 {
   "answer": "",
@@ -41,6 +48,7 @@ Required JSON shape:
   },
   "riskLevel": "low",
   "confidence": "low",
-  "safetyDisclaimer": ""
+  "safetyDisclaimer": "",
+  "questionFocus": "general"
 }`;
 }

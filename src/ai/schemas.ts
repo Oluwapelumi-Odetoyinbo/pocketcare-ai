@@ -16,7 +16,8 @@ export const MedicineGuidanceSchema = z.object({
   }),
   riskLevel: z.enum(["low", "medium", "high", "emergency"]).catch("low"),
   confidence: z.enum(["low", "medium", "high"]).catch("medium"),
-  safetyDisclaimer: z.string()
+  safetyDisclaimer: z.string(),
+  questionFocus: z.string().optional()
 });
 
 export type MedicineGuidance = z.infer<typeof MedicineGuidanceSchema>;

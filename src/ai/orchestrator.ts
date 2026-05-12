@@ -36,7 +36,7 @@ export async function runMedicineAssistant({
   try {
     const guidance = await askGemmaDirectMedicine({
       medicineName,
-      question: question || "Tell me about this medicine.",
+      question: question || medicineName || "Tell me about this medicine.",
       language,
     });
 

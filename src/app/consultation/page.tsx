@@ -414,7 +414,7 @@ export default function Home() {
                   <p className="text-sm text-muted">Analyzing your request safely.</p>
                 </div>
               ) : assistantResponse ? (
-                <ResultView response={assistantResponse} language="Simple English" onClose={handleBackToSearch} isSaved={isSaved(medicineName)} onToggleSave={() => assistantResponse && toggleSave(medicineName, assistantResponse)} />
+                <ResultView response={assistantResponse} language="Simple English" onClose={handleBackToSearch} isSaved={isSaved(medicineName)} onToggleSave={() => assistantResponse && toggleSave(medicineName, assistantResponse)} question={medicineName} />
               ) : null}
             </div>
           </div>

@@ -9,6 +9,7 @@ interface ResultViewProps {
   language: string;
   isSaved?: boolean;
   onToggleSave?: () => void;
+  question?: string;
 }
 
 /* ─── Animated Section Card ─── */
@@ -158,7 +159,7 @@ function ReminderModal({ reminder, onDismiss }: { reminder: { reason: string; su
   );
 }
 
-export default function ResultView({ response, onClose, isSaved, onToggleSave }: ResultViewProps) {
+export default function ResultView({ response, onClose, isSaved, onToggleSave, question }: ResultViewProps) {
   const [headerVisible, setHeaderVisible] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -212,8 +213,12 @@ export default function ResultView({ response, onClose, isSaved, onToggleSave }:
 
   const { guidance } = response;
 
+  const answerTitle = guidance.questionFocus && guidance.questionFocus !== "general"
+    ? "Answer"
+    : "What is it used for?";
+
   const sections = [
-    { key: "answer", title: "What is it used for?", accentColor: "bg-primary/10 text-primary", icon: <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>, content: guidance.answer, type: "text" as const, dotColor: "bg-primary" },
+    { key: "answer", title: answerTitle, accentColor: "bg-primary/10 text-primary", icon: <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>, content: guidance.answer, type: "text" as const, dotColor: "bg-primary" },
     { key: "uses", title: "How to take", accentColor: "bg-blue-50 text-blue-600", icon: <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3" /></svg>, items: guidance.commonUses, type: "list" as const, dotColor: "bg-blue-500" },
     { key: "sideEffects", title: "Side effects", accentColor: "bg-amber-50 text-amber-600", icon: <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>, items: guidance.possibleSideEffects, type: "list" as const, dotColor: "bg-amber-500" },
     { key: "warnings", title: "Warnings & cautions", accentColor: "bg-red-50 text-red-500", icon: <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>, items: guidance.keyWarnings, type: "list" as const, dotColor: "bg-red-500" },
