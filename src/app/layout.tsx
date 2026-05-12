@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const newsreader = Newsreader({
@@ -58,6 +59,7 @@ export default function RootLayout({
           }}
         />
         {children}
+        <Analytics />
         <Script
           id="sw-register"
           strategy="afterInteractive"
