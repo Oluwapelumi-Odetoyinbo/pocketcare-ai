@@ -25,6 +25,32 @@ export default function Home() {
   type Tab = "home" | "history" | "saved" | "settings";
   const [activeTab, setActiveTab] = useState<Tab>("home");
 
+  type SavedItem = { medicineName: string; response: AssistantResponse };
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("pocketcare_saved");
+      if (stored) setSavedItems(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("pocketcare_saved", JSON.stringify(savedItems));
+    } catch {}
+  }, [savedItems]);
+
+  const toggleSave = (name: string, response: AssistantResponse) => {
+    setSavedItems(prev => {
+      const exists = prev.some(item => item.medicineName.toLowerCase() === name.toLowerCase());
+      if (exists) return prev.filter(item => item.medicineName.toLowerCase() !== name.toLowerCase());
+      return [{ medicineName: name, response }, ...prev];
+    });
+  };
+
+  const isSaved = (name: string) => savedItems.some(item => item.medicineName.toLowerCase() === name.toLowerCase());
+
   const loadingMessages = [
     "Checking medicine knowledge...",
     "Consulting Gemma 4 AI...",
@@ -292,13 +318,29 @@ export default function Home() {
                 <div className="px-5 pt-6 md:px-8 lg:px-16 md:max-w-5xl md:mx-auto w-full">
                   <h2 className="text-2xl font-extrabold text-ink tracking-tight md:text-3xl">Saved</h2>
                   <p className="text-sm text-muted mt-1 mb-6">Your bookmarked medicine guides</p>
-                  <div className="text-center py-20">
-                    <div className="w-16 h-16 rounded-full bg-surface-card border border-border flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-7 h-7 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
+                  {savedItems.length > 0 ? (
+                    <div className="space-y-2">
+                      {savedItems.map((item, i) => (
+                        <button key={i} onClick={() => { setMedicineName(item.medicineName); setAssistantResponse(item.response); setAppState("result"); }} className="w-full flex items-center justify-between px-4 py-3.5 bg-surface-card rounded-2xl border border-border shadow-sm hover:border-primary/30 hover:shadow-md transition-all text-left group">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-primary-soft flex items-center justify-center">
+                              <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                            </div>
+                            <span className="text-sm font-medium text-ink">{item.medicineName}</span>
+                          </div>
+                          <svg className="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                        </button>
+                      ))}
                     </div>
-                    <h3 className="text-lg font-bold text-ink mb-1">Nothing saved yet</h3>
-                    <p className="text-sm text-muted max-w-xs mx-auto">Tap the bookmark icon on any medicine guide to save it here for quick access.</p>
-                  </div>
+                  ) : (
+                    <div className="text-center py-20">
+                      <div className="w-16 h-16 rounded-full bg-surface-card border border-border flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-7 h-7 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
+                      </div>
+                      <h3 className="text-lg font-bold text-ink mb-1">Nothing saved yet</h3>
+                      <p className="text-sm text-muted max-w-xs mx-auto">Tap the bookmark icon on any medicine guide to save it here for quick access.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -346,8 +388,8 @@ export default function Home() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
               </button>
               <div className="flex items-center gap-2">
-                <button className="w-10 h-10 flex items-center justify-center rounded-xl text-muted hover:text-ink hover:bg-surface-card transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
+                <button onClick={() => assistantResponse && toggleSave(medicineName, assistantResponse)} className={`w-10 h-10 flex items-center justify-center rounded-xl transition-colors ${isSaved(medicineName) ? "text-primary" : "text-muted hover:text-ink hover:bg-surface-card"}`}>
+                  <svg className="w-5 h-5" fill={isSaved(medicineName) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
                 </button>
                 <button className="w-10 h-10 flex items-center justify-center rounded-xl text-muted hover:text-ink hover:bg-surface-card transition-colors">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8a2 2 0 110-4 2 2 0 010 4zM12 14a2 2 0 110-4 2 2 0 010 4zM12 20a2 2 0 110-4 2 2 0 010 4z" /></svg>
@@ -372,7 +414,7 @@ export default function Home() {
                   <p className="text-sm text-muted">Analyzing your request safely.</p>
                 </div>
               ) : assistantResponse ? (
-                <ResultView response={assistantResponse} language="Simple English" onClose={handleBackToSearch} />
+                <ResultView response={assistantResponse} language="Simple English" onClose={handleBackToSearch} isSaved={isSaved(medicineName)} onToggleSave={() => assistantResponse && toggleSave(medicineName, assistantResponse)} />
               ) : null}
             </div>
           </div>

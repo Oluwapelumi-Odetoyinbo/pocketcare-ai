@@ -7,6 +7,8 @@ interface ResultViewProps {
   response: AssistantResponse;
   onClose: () => void;
   language: string;
+  isSaved?: boolean;
+  onToggleSave?: () => void;
 }
 
 /* ─── Animated Section Card ─── */
@@ -156,7 +158,7 @@ function ReminderModal({ reminder, onDismiss }: { reminder: { reason: string; su
   );
 }
 
-export default function ResultView({ response, onClose }: ResultViewProps) {
+export default function ResultView({ response, onClose, isSaved, onToggleSave }: ResultViewProps) {
   const [headerVisible, setHeaderVisible] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -248,8 +250,15 @@ export default function ResultView({ response, onClose }: ResultViewProps) {
               </p>
             )}
           </div>
-          <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center shrink-0 border border-primary/10">
-            <span className="text-xl md:text-2xl">💊</span>
+          <div className="flex items-center gap-2">
+            {onToggleSave && (
+              <button onClick={onToggleSave} className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-colors ${isSaved ? "text-primary" : "text-muted hover:text-ink hover:bg-surface-card"}`} title={isSaved ? "Unsave" : "Save"}>
+                <svg className="w-5 h-5 md:w-5 md:h-5" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" /></svg>
+              </button>
+            )}
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center shrink-0 border border-primary/10">
+              <span className="text-xl md:text-2xl">💊</span>
+            </div>
           </div>
         </div>
 
