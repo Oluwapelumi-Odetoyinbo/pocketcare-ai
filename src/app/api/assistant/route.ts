@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { type: "error", message: "Gemma API is unavailable right now. Please check your API key or try again." },
+        { type: "error", message: "Sorry, I couldn't look up that medicine right now. Please try again in a moment." },
         { status: 503 }
       );
     }
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     if (!medicineName || question === undefined) {
       return NextResponse.json(
-        { type: "error", message: "Medicine name and question are required." },
+        { type: "error", message: "Please enter a medicine name to search." },
         { status: 400 }
       );
     }

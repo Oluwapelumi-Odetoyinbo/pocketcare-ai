@@ -109,7 +109,7 @@ export default function Home() {
       setAssistantResponse(data);
     } catch (error) {
       console.error("Consultation error:", error);
-      setAssistantResponse({ type: "error", message: "Gemma API is unavailable right now. Please check your API key or try again." });
+      setAssistantResponse({ type: "error", message: "Sorry, I couldn't look up that medicine right now. Please try again in a moment." });
     } finally {
       setIsLoading(false);
     }

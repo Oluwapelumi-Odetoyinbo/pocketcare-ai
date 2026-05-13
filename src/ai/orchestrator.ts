@@ -50,7 +50,7 @@ export async function runMedicineAssistant({
     console.error("Orchestrator error:", error);
     return {
       type: "error",
-      message: error instanceof Error ? error.message : "An unexpected error occurred while consulting Gemma.",
+      message: "Sorry, I couldn't look up that medicine right now. Please try again in a moment.",
     };
   }
 }
